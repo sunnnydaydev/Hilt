@@ -265,6 +265,17 @@ class MainActivity : AppCompatActivity() {
 ```
 可见限定符使用成功
 
+（3）Hilt 中的预定义限定符
+
+# Hilt组件
+
+todo
+
+# 参考
+
+[官方文档](https://developer.android.google.cn/training/dependency-injection/hilt-android?hl=zh-cn#multiple-bindings)
+
+
 
 
 
