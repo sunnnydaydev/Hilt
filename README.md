@@ -495,7 +495,7 @@ data class TestViewModel @Inject constructor(val fish: Fish) : ViewModel() {
 
 将模块安装到组件后，其绑定就可以用作该组件中其他绑定的依赖项，也可以用作组件层次结构中该组件下的任何子组件中其他绑定的依赖项：
 
-![](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/DaggerContainer.png)
+![](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/hilt.png)
 
 默认情况下，如果您在视图中执行字段注入，ViewComponent 可以使用 ActivityComponent 中定义的绑定。如果您还需要使用 FragmentComponent 中定义的绑定并且视图是 fragment 的一部分，应将 @WithFragmentBindings 注解和 @AndroidEntryPoint 一起使用。
 
