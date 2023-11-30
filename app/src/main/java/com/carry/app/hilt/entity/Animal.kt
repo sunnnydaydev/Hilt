@@ -10,3 +10,5 @@ abstract class Animal
 class Dog @Inject constructor() : Animal()
 
 class Cat : Animal()
+
+class Fish:Animal()

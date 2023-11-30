@@ -30,7 +30,7 @@ class SplashActivity : AppCompatActivity() {
         Log.d("SplashActivity", "cat:$cat")
         Log.d("SplashActivity", "dog2:$dog2")
         findViewById<View>(R.id.btnOpen).setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, TestActivity::class.java))
         }
     }
 }

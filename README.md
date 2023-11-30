@@ -267,13 +267,247 @@ class MainActivity : AppCompatActivity() {
 
 （3）Hilt 中的预定义限定符
 
+即使通过@Provider、@Binds我们还是无法获取到activity、Application的context的。Hilt想到了这点提供了两个注解
+
+- @ActivityContext
+- @ApplicationContext
+
+
+```kotlin
+data class BannerAdapter @Inject constructor(@ActivityContext val context: Context)
+data class ImageAdapter @Inject constructor(@ApplicationContext val context: Context)
+```
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var bannerAdapter: BannerAdapter
+
+    @Inject
+    lateinit var imageAdapter: ImageAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        Log.d("MainActivity", "adapter1:$bannerAdapter")
+        Log.d("MainActivity", "adapter2:$imageAdapter")
+        //adapter1:BannerAdapter(context=com.carry.app.hilt.ui.MainActivity@8c8df92)
+        //adapter2:ImageAdapter(context=com.carry.app.hilt.MyApplication@dc45142)
+    }
+}
+```
+
+关于预置Qualifier其实还有一个隐藏的小技巧，就是对于Application和Activity这两个类型，Hilt也是给它们预置好了注入功能。也就是说，如果你的某个类依赖于Application或者Activity，不需要想办法为这两个类提供依赖注入的实例，Hilt自动就能识别它们。如下所示：
+
+```kotlin
+data class ApplicationAdapter @Inject constructor(val context: Application)
+data class ActivityAdapter @Inject constructor(val activity: Activity)
+```
+
+注意必须是Application和Activity这两个类型，即使是声明它们的子类型，编译都无法通过。
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var applicationAdapter: ApplicationAdapter
+
+    @Inject
+    lateinit var activityAdapter: ActivityAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        Log.d("MainActivity", "adapter1:$applicationAdapter")
+        Log.d("MainActivity", "adapter2:$activityAdapter")
+    }
+}
+```
+
+我们可能会碰到这样的场景？在自定义的MyApplication中定义了一些api，但是通过Hilt获取到Application的对象后每次都要强转一下比较繁琐，此时我们可以这样做：
+
+```kotlin
+/**
+ * Create by SunnyDay /11/30 20:44:25
+ */
+@Module
+@InstallIn(SingletonComponent::class)//指定module受app容器管理，app中都可以使用
+class AppModule {
+    @Provides
+    fun providerMyApplication(application: Application) = application as MyApplication
+}
+```
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var application:MyApplication
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        Log.d("MainActivity", "application:$application")
+    }
+}
+```
+
+# Hilt支持的切入点
+
+Hilt大幅简化了Dagger2的用法，使得我们不用通过@Component注解去编写桥接层的逻辑，但是也因此限定了注入功能只能从几个Android固定的入口点开始：
+
+- Application
+- Activity
+- Fragment
+- View
+- Service
+- BroadcastReceiver
+
+其中，只有Application这个入口点是使用@HiltAndroidApp注解来声明的，其他的所有入口点，都是用@AndroidEntryPoint注解来声明的。
+
+上面都是使用activity作为Hilt注入点来举例的，这里就看看其他android组件是怎样使用的
+
+###### 1、Fragment 🌰
+
+```kotlin
+
+```
+
+```kotlin
+@AndroidEntryPoint
+class TestFragment : Fragment() {
+
+    @Inject
+    lateinit var cat:Cat
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        Log.d("TestFragment","cat:${cat}")
+        return inflater.inflate(R.layout.fragment_test, container, false)
+    }
+    
+}
+```
+
+```kotlin
+@AndroidEntryPoint
+class TestActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_test)
+        supportFragmentManager.beginTransaction().replace(R.id.fl_container,TestFragment()).commit()
+    }
+}
+```
+
+这里其实就需要注意一点就可以了，fragment依附的activity也要标记@AndroidEntryPoint，否则你会得到如下编译错误：
+
+IllegalStateException: Hilt Fragments must be attached to an @AndroidEntryPoint Activity. 
+
+Found: class com.carry.app.hilt.ui.TestActivity
+
+好了view、service、BroadcastReceiver都是类似使用 @AndroidEntryPoint即可。那么我们要是使用ViewModel该如何做呢？这个不属于上述6个入口点。
+
+###### 2、ViewModel 栗子
+
+```kotlin
+abstract class Animal
+class Fish:Animal()
+```
+
+```kotlin
+/**
+ * Create by SunnyDay /11/30 21:36:07
+ */
+@Module
+@InstallIn(ViewModelComponent::class)
+class ViewModelModule {
+    @Provides
+    fun providerFish() = Fish()
+}
+```
+
+```kotlin
+@AndroidEntryPoint
+class TestActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_test)
+        supportFragmentManager.beginTransaction().replace(R.id.fl_container,TestFragment()).commit()
+    }
+}
+```
+
+```kotlin
+@AndroidEntryPoint
+class TestFragment : Fragment() {
+
+    private lateinit var viewModel: TestViewModel
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_test, container, false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        viewModel = ViewModelProvider(this)[TestViewModel::class.java]
+    }
+}
+```
+
+```kotlin
+@HiltViewModel
+data class TestViewModel @Inject constructor(val fish: Fish) : ViewModel() {
+    init {
+        Log.d("TestViewModel","fish:$fish")
+    }
+}
+```
+
+可见很简单，为TestViewModel添加@HiltViewModel注解即可。
+
+通过Provides提供对象时容器可以指定为ViewModelComponent
+
+###### 3、其他
+
+ContentProvider 等等
+
 # Hilt组件
+
+前面使用了ViewModelComponent、ActivityComponent这些是啥呢？或许我们可以猜到了一些，这些是Hilt提供的容器。就拿SingletonComponent来说这个是一个全局的容器，它负责
+管理着app中的其他容器。而ActivityComponent就是所有的activity的容器，在dagger中我们需要创建一个ActivityComponent接口，然后每个activity需要注入字段时首先需要在
+这个接口中定义一个注入方法。并且还要让ActivityComponent受SingletonComponent管理，这是一件繁琐的事情，现在看来Hilt真是简便多了。
+
+接下来看看Hilt提供了哪些容器，对应哪些安卓类，生命周期是怎样的，以及默认提供的作用域范围：
+
+| 容器 | 容器对应Android 类      | 容器创建时机| 容器销毁时机| 提供的容器内单例注解
+|--------| -------------| ----|  ---| ---|
+| SingletonComponent | Application |Application#onCreate()|Application 已销毁|@Singleton
+| ActivityRetainedComponent | 不适用 |Activity#onCreate()|Activity#onDestroy()|@ActivityRetainedScoped
+| ViewModelComponent | ViewModel |ViewModel 已创建|ViewModel 已销毁|@ViewModelScoped
+| ActivityComponent | Activity |Activity#onCreate()|Activity#onDestroy()|@ActivityScoped
+| FragmentComponent | Fragment |Fragment#onAttach()|Fragment#onDestroy()|@FragmentScoped
+| ViewComponent | View |View#super()|View 已销毁|@ViewScoped
+| ViewWithFragmentComponent | 带有 @WithFragmentBindings 注解的 View |View#super()|View 已销毁|@ViewScoped
+| ServiceComponent | Service |Service#onCreate()|Service#onDestroy()|@ServiceScoped
+
+
 
 todo
 
 # 参考
 
 [官方文档](https://developer.android.google.cn/training/dependency-injection/hilt-android?hl=zh-cn#multiple-bindings)
+
+[Jetpack新成员，一篇文章带你玩转Hilt和依赖注入](https://mp.weixin.qq.com/s/dAhwLiYeFizdMRu_nN6Y7Q)
 
 
 
