@@ -472,6 +472,75 @@ data class TestViewModel @Inject constructor(val fish: Fish) : ViewModel() {
 
 通过Provides提供对象时容器可以指定为ViewModelComponent
 
+###### 3、View 栗子
+
+```kotlin
+class Dog @Inject constructor() : Animal()
+```
+
+```kotlin
+@AndroidEntryPoint
+class MyTextView constructor(
+    private val cs: Context,
+    private val attributes: AttributeSet?
+) :
+    AppCompatTextView(
+        cs, attributes
+    ) {
+
+    @Inject
+    lateinit var dog: Dog
+
+}
+```
+
+在activity中使用自定义的View
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.carry.app.hilt.ui.ViewActivity">
+
+    <com.carry.app.hilt.ui.MyTextView
+        android:id="@+id/myTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="测试" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+```kotlin
+@AndroidEntryPoint
+class ViewActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_view)
+
+        val myTextView: MyTextView = findViewById(R.id.myTextView)
+        myTextView.text = myTextView.dog.javaClass.simpleName
+        // 注意view依赖的activity或者fragment要添加AndroidEntryPoint否则会报错的
+        //IllegalStateException: class com.carry.app.hilt.ui.MyTextView, Hilt view must be attached to an @AndroidEntryPoint Fragment or Activity.
+    }
+}
+```
+
+
+###### 4、如何为不支持的类进行依赖注入
+
+
+
+
+###### 注意点
+
+- Hilt 仅支持扩展 ComponentActivity 的 activity，如 AppCompatActivity。
+- Hilt 仅支持扩展 androidx.Fragment 的 Fragment
+- Hilt 注入的字段不能为私有字段。尝试使用 Hilt 注入私有字段会导致编译错误。
 
 # Hilt组件
 
@@ -493,11 +562,19 @@ data class TestViewModel @Inject constructor(val fish: Fish) : ViewModel() {
 | ServiceComponent | Service |Service#onCreate()|Service#onDestroy()|@ServiceScoped
 
 
+默认情况下，Hilt 中的所有绑定都未限定作用域。这意味着，每当应用请求绑定时，Hilt 都会创建所需类型的一个新实例。 Hilt 也允许将绑定的作用域限定为特定组件。Hilt 只为绑定作用域限定到的组件的每个实例创建一次限定作用域的绑定，对该绑定的所有请求共享同一实例。
+
 将模块安装到组件后，其绑定就可以用作该组件中其他绑定的依赖项，也可以用作组件层次结构中该组件下的任何子组件中其他绑定的依赖项：
 
 ![](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/hilt.png)
 
 默认情况下，如果您在视图中执行字段注入，ViewComponent 可以使用 ActivityComponent 中定义的绑定。如果您还需要使用 FragmentComponent 中定义的绑定并且视图是 fragment 的一部分，应将 @WithFragmentBindings 注解和 @AndroidEntryPoint 一起使用。
+
+###### 1、ActivityComponent与ActivityRetainedComponent的区别
+
+ActivityComponent组件与单个 Activity 的生命周期绑定。每个 Activity 都有一个相应的 ActivityComponent，它在该 Activity 的生命周期内创建和销毁。这意味着该组件中的依赖项的生命周期与相应的 Activity 相关联。当 Activity 被销毁时，ActivityComponent 中的依赖项也将被销毁。
+
+ActivityRetainedComponent组件用于在多个 Activity 之间保持共享的依赖项，其生命周期比单个 Activity 更长。通常，ActivityRetainedComponent 绑定到一个被标记为 @EntryPoint 的类，这个类是一个能够提供在多个 Activity 之间共享的依赖项的入口点。这样，当一个 Activity 被销毁时，与 ActivityRetainedComponent 相关的依赖项仍然存在，以便下一个 Activity 可以共享它们。
 
 # 参考
 
