@@ -7,7 +7,6 @@ import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.carry.app.hilt.entity.Cat
 import com.carry.app.hilt.entity.Dog
-import com.carry.app.hilt.other.ImageHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -27,8 +26,5 @@ class MyTextView constructor(
     @Inject
     lateinit var dog: Dog
 
-    init {
-
-    }
 
 }

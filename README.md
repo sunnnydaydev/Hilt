@@ -533,6 +533,54 @@ class ViewActivity : AppCompatActivity() {
 
 ###### 4、如何为不支持的类进行依赖注入
 
+Hilt支持常见android类注入，有些情况下我们可能需要把某些实例注入到不支持的类中，这时我们可以使用@EntryPoint，举个🌰
+
+```kotlin
+/**
+ * Create by SunnyDay /12/07 20:40:48
+ */
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface IUnSupport {
+    fun getDog():Dog
+}
+```
+
+如上使用 @EntryPoint 注解创建入口点。
+
+Hilt 并不直接支持自定义类UnSupport，如果您希望 自定义类UnSupport 使用 Hilt 来获取某些依赖项，需要为所需的每个绑定类型定义一个带有 @EntryPoint 注解的接口并添加限定符。然后，添加 @InstallIn 以指定要在其中安装入口点的组件。
+
+
+```kotlin
+class UnSupport(val context: Context) {
+    lateinit var dog: Dog
+    init {
+        val hiltEntryPoint = EntryPointAccessors.fromApplication(context,IUnSupport::class.java)
+        dog = hiltEntryPoint.getDog()
+        Log.d("TAG-TEST","my test:${dog}")
+        //my test:com.carry.app.hilt.entity.Dog@6354b8d
+    }
+}
+```
+
+如上使用EntryPointAccessors访问入口点
+
+```kotlin
+@AndroidEntryPoint
+class TestActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_test)
+        supportFragmentManager.beginTransaction().replace(R.id.fl_container,TestFragment()).commit()
+        UnSupport(applicationContext)
+    }
+}
+```
+
+上述例子中必须使用ApplicationContext参数，因为我们入口点安装到了SingletonComponent中，若是安装到ActivityComponent我们应该使用ActivityContext
+
+好了到了这里就知道怎样在ContentProvider使用Hilt管理的依赖项了。
 
 
 
