@@ -3,6 +3,7 @@ package com.carry.app.hilt
 import android.app.Application
 import com.carry.app.hilt.entity.Dog
 import com.example.core.entity.Man
+import com.example.core.entity.Person
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -12,9 +13,9 @@ import javax.inject.Inject
 @HiltAndroidApp
 class MyApplication : Application() {
     @Inject
-    lateinit var dog:Dog
+    lateinit var person:Man
     override fun onCreate() {
         super.onCreate()
-        println("my test:${dog}")
+        println("my test:${person}")
     }
 }

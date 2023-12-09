@@ -75,4 +75,51 @@ class SplashActivity : AppCompatActivity() {
 }
 ```
 
+好了看来自己的想法跑不通该如何解决呢？这里问了下ChatGPT其中有这样一句话"对于每个有 Dagger-Hilt 依赖的模块，都需要进行配置。"看到这里又把app module所需要的hilt依赖加了回来。
+
+# 入门
+
+Core module Person.kt
+
+```kotlin
+interface Person
+
+class Man @Inject constructor() :Person
+```
+
+###### 1、测试在 app Module 中使用
+
+```kotlin
+@HiltAndroidApp
+class MyApplication : Application() {
+    @Inject
+    lateinit var person:Man
+    override fun onCreate() {
+        super.onCreate()
+        println("my test:${person}")
+    }
+}
+```
+观察正常打印结果
+
+###### 2、在Core Module 中使用
+
+```kotlin
+@AndroidEntryPoint
+class CoreActivity : AppCompatActivity() {
+    @Inject
+    lateinit var person: Man
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_core)
+        println("i am core activity:${person}")
+    }
+}
+```
+观察正常打印结果
+
+
+
+
+
 
