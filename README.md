@@ -624,6 +624,10 @@ ActivityComponent组件与单个 Activity 的生命周期绑定。每个 Activit
 
 ActivityRetainedComponent组件用于在多个 Activity 之间保持共享的依赖项，其生命周期比单个 Activity 更长。通常，ActivityRetainedComponent 绑定到一个被标记为 @EntryPoint 的类，这个类是一个能够提供在多个 Activity 之间共享的依赖项的入口点。这样，当一个 Activity 被销毁时，与 ActivityRetainedComponent 相关的依赖项仍然存在，以便下一个 Activity 可以共享它们。
 
+# 多模块中使用Hilt
+
+[多模块中使用Hilt](./多模块中使用hilt.md)
+
 # 参考
 
 [官方文档](https://developer.android.google.cn/training/dependency-injection/hilt-android?hl=zh-cn#multiple-bindings)

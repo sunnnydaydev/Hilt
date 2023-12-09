@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.carry.app.hilt.entity.Animal
 import com.carry.app.hilt.entity.Cat
 import com.carry.app.hilt.entity.Dog
+import com.example.core.ui.CoreActivity
 import com.zennioptical.app.hilt.R
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
