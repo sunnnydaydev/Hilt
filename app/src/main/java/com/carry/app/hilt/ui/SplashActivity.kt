@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.carry.app.hilt.entity.Animal
 import com.carry.app.hilt.entity.Cat
 import com.carry.app.hilt.entity.Dog
+import com.example.core.entity.Woman
 import com.example.core.ui.CoreActivity
 import com.zennioptical.app.hilt.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,6 +24,7 @@ class SplashActivity : AppCompatActivity() {
     lateinit var cat: Cat
 
     @Inject lateinit var dog2: Animal
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

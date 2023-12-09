@@ -8,3 +8,11 @@ import javax.inject.Inject
 interface Person
 
 class Man @Inject constructor() :Person
+
+class Woman{
+    init {
+        println("women:$this")
+    }
+}
+
+class PersonImpl @Inject constructor():Person

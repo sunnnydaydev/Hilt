@@ -79,15 +79,32 @@ class SplashActivity : AppCompatActivity() {
 
 # 入门
 
-Core module Person.kt
+Core module 定义
 
 ```kotlin
 interface Person
 
 class Man @Inject constructor() :Person
+
+class Woman{
+    init {
+        println("women:$this")
+    }
+}
 ```
 
-###### 1、测试在 app Module 中使用
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+class ProviderPerson {
+    @Provides
+    fun providerWomen() = Woman()
+}
+```
+
+###### 1、@Inject 注解
+
+测试在 app Module 中使用
 
 ```kotlin
 @HiltAndroidApp
@@ -100,9 +117,9 @@ class MyApplication : Application() {
     }
 }
 ```
-观察正常打印结果
 
-###### 2、在Core Module 中使用
+
+在Core Module 中使用
 
 ```kotlin
 @AndroidEntryPoint
@@ -116,7 +133,49 @@ class CoreActivity : AppCompatActivity() {
     }
 }
 ```
+
 观察正常打印结果
+
+
+###### 2、@Provides 注解
+
+测试在 app Module 中使用
+
+```kotlin
+@HiltAndroidApp
+class MyApplication : Application() {
+    @Inject
+    lateinit var woman:Woman
+
+    override fun onCreate() {
+        super.onCreate()
+    }
+}
+```
+
+在Core Module 中使用
+
+```kotlin
+@AndroidEntryPoint
+class CoreActivity : AppCompatActivity() {
+    @Inject
+    lateinit var person: Man
+
+    @Inject
+    lateinit var woman: Woman
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_core)
+    }
+}
+```
+
+观察正常打印结果
+
+###### 3、@Binds
+
+
+
 
 
 
