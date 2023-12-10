@@ -174,9 +174,6 @@ class MyApplication : Application() {
 @AndroidEntryPoint
 class CoreActivity : AppCompatActivity() {
     @Inject
-    lateinit var person: Man
-
-    @Inject
     lateinit var woman: Woman
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
