@@ -4,6 +4,7 @@ import android.app.Application
 import com.carry.app.hilt.entity.Dog
 import com.example.core.entity.Man
 import com.example.core.entity.Person
+import com.example.core.entity.PersonImpl
 import com.example.core.entity.Woman
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -18,6 +19,9 @@ class MyApplication : Application() {
 
     @Inject
     lateinit var woman:Woman
+
+    @Inject
+    lateinit var personImpl: Person
 
     override fun onCreate() {
         super.onCreate()

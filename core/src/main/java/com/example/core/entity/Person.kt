@@ -15,4 +15,8 @@ class Woman{
     }
 }
 
-class PersonImpl @Inject constructor():Person
+class PersonImpl @Inject constructor():Person{
+    init {
+        println("PersonImpl:$this")
+    }
+}

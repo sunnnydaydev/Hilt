@@ -91,6 +91,12 @@ class Woman{
         println("women:$this")
     }
 }
+
+class PersonImpl @Inject constructor():Person{
+    init {
+        println("PersonImpl:$this")
+    }
+}
 ```
 
 ```kotlin
@@ -99,6 +105,15 @@ class Woman{
 class ProviderPerson {
     @Provides
     fun providerWomen() = Woman()
+}
+```
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+interface BindsModule {
+    @Binds
+    fun getPerson(personImpl: PersonImpl):Person
 }
 ```
 
@@ -153,7 +168,7 @@ class MyApplication : Application() {
 }
 ```
 
-在Core Module 中使用
+测试在Core Module 中使用
 
 ```kotlin
 @AndroidEntryPoint
@@ -173,6 +188,36 @@ class CoreActivity : AppCompatActivity() {
 观察正常打印结果
 
 ###### 3、@Binds
+
+测试在 app Module 中使用
+
+```kotlin
+@HiltAndroidApp
+class MyApplication : Application() {
+    @Inject
+    lateinit var personImpl: Person
+
+    override fun onCreate() {
+        super.onCreate()
+    }
+}
+```
+
+测试在Core Module 中使用
+
+```kotlin
+@AndroidEntryPoint
+class CoreActivity : AppCompatActivity() {
+    @Inject
+    lateinit var personImpl: Person
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_core)
+    }
+}
+```
+
+观察正常打印结果
 
 
 
