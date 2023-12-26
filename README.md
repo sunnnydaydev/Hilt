@@ -628,11 +628,17 @@ ActivityRetainedComponent组件用于在多个 Activity 之间保持共享的依
 
 [多模块中使用Hilt](./多模块中使用hilt.md)
 
+# Dagger to Hilt 
+
+[测试Dagger2Hilt](./测试Dagger2Hilt.md)
+
 # 参考
 
 [官方文档](https://developer.android.google.cn/training/dependency-injection/hilt-android?hl=zh-cn#multiple-bindings)
 
 [Jetpack新成员，一篇文章带你玩转Hilt和依赖注入](https://mp.weixin.qq.com/s/dAhwLiYeFizdMRu_nN6Y7Q)
+
+[Dagger to Hilt官方文档](https://developers.google.cn/codelabs/android-dagger-to-hilt?hl=zh-cn#0)
 
 
 

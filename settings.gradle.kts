@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "Hilt"
 include(":app")
 include(":core")
+include(":test")
