@@ -583,12 +583,44 @@ class TestActivity : AppCompatActivity() {
 好了到了这里就知道怎样在ContentProvider使用Hilt管理的依赖项了。
 
 
-
 ###### 注意点
 
 - Hilt 仅支持扩展 ComponentActivity 的 activity，如 AppCompatActivity。
 - Hilt 仅支持扩展 androidx.Fragment 的 Fragment
 - Hilt 注入的字段不能为私有字段。尝试使用 Hilt 注入私有字段会导致编译错误。
+- Hilt setter注入的字段不能直接在init块中使用否则crash
+```kotlin
+
+@HiltViewModel
+class HomeFragmentViewModel @Inject constructor() : HomeFragmentContract.ViewModel() {
+
+    @Inject
+    lateinit var repository: HomeRepository
+
+    init {
+        /**
+         *  如下直接打log这样会crash：
+         *  Timber.d("HomeFragmentViewModel->${repository.localDataSource.getLocalData()}")
+         *  如何避免crash呢，有如下几种方式：
+         *  1、delay后使用
+         *  2、viewModelScope就不会crash
+         *          viewModelScope.launch {
+         *             Timber.d("HomeFragmentViewModel->${repository.localDataSource.getLocalData()}")
+         *         }
+         *  3、通过构造注入也不会crash。
+         *  结论：Hilt setter注入的字段 不能直接通过init调用。需要延迟调用或者在对应的Scope组件中调用。
+         */
+        viewModelScope.launch {
+            Timber.d("HomeFragmentViewModel->${repository.localDataSource.getLocalData()}")
+        }
+    }
+
+    override fun onViewEvent(event: HomeFragmentContract.ViewEvent) {
+
+    }
+}
+
+```
 
 # Hilt组件
 
